@@ -83,13 +83,13 @@ public class SocksController {
                     description = "Запрос выполнен", content = @Content(
                     mediaType = "application/json")),
             @ApiResponse(
-                    responseCode = "204",
-                    description = "Данного товара на складе нет", content = @Content(
-                    mediaType = "application/json")),
-            @ApiResponse(
                     responseCode = "400",
                     description = "Параметры запроса отсутствуют или имеют некорректный формат"
             ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Данного товара на складе нет", content = @Content(
+                    mediaType = "application/json")),
             @ApiResponse(
                     responseCode = "500",
                     description = "Произошла ошибка, не зависящая от вызывающей стороны"
@@ -99,7 +99,7 @@ public class SocksController {
                                         @RequestParam(required = false, defaultValue = "0") int cottonMin,  @RequestParam(required = false, defaultValue = "100") int cottonMax) {
         int sum = service.getSocks(color, size, (int) cottonMin, (int) cottonMax);
         if (sum==0){
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok().body(sum);
     }
