@@ -1,14 +1,33 @@
 package me.fevralev.socksapp.model;
 
-public enum Color {
-    WHITE("белый"), BLACK("черный"), BLUE("синий"), RED("красный"), YELLOW("желтый"), GREEN("зеленый");
-    private String text;
+import me.fevralev.socksapp.exception.WrongColorException;
 
-    Color(String text) {
-        this.text = text;
+
+public enum Color {
+    WHITE("белый"),
+    BLACK("черный"),
+    BLUE("синий"),
+    RED("красный"),
+    YELLOW("желтый"),
+    GREEN("зеленый");
+
+    private String color;
+
+    Color(String color) {
+        this.color = color;
     }
 
     public String getColor() {
-        return text;
+        return color;
     }
+
+    public static Color colorOf(String inputColor) {
+        for (Color value : Color.values()) {
+            if (value.color.equals(inputColor)) {
+                return value;
+            }
+        }
+        return null;
     }
+
+}

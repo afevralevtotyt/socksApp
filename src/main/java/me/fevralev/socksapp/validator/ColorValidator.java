@@ -1,13 +1,13 @@
 package me.fevralev.socksapp.validator;
 
+import me.fevralev.socksapp.model.Color;
+
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-public class ColorValidator implements ConstraintValidator <Color, String>{
+public class ColorValidator implements ConstraintValidator <ColorValid, String>{
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-            return value.equals("белый")||value.equals("синий")||value.equals("зеленый")||value.equals("красный")
-                    ||value.equals("желтый")||value.equals("черный");
-
+            return Color.colorOf(value)!=null;
     }
 }

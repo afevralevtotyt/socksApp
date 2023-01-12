@@ -2,6 +2,7 @@ package me.fevralev.socksapp.service;
 
 import me.fevralev.socksapp.model.Sock;
 import me.fevralev.socksapp.model.SockInput;
+import me.fevralev.socksapp.validator.ColorValid;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
@@ -13,7 +14,7 @@ public interface SockService {
 
     SockInput add(@Valid SockInput socksInput);
 
-    int getSocks(@me.fevralev.socksapp.validator.Color String color, @Min(36) @Max(49) int size, @Min(0) @Max(100) int cottonMin, @Min(0)@Max(100) int cottonMax);
+    int getSocks(@ColorValid String color, @Min(36) @Max(49) int size, @Min(0) @Max(100) int cottonMin, @Min(0)@Max(100) int cottonMax);
 
     SockInput delete(@Valid SockInput socksInput);
 

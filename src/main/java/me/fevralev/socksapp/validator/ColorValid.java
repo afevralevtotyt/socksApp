@@ -14,7 +14,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Constraint(validatedBy = ColorValidator.class)
 @Documented
-public @interface Color {
+public @interface ColorValid {
 
     String message() default "Неверный цвет";
 
