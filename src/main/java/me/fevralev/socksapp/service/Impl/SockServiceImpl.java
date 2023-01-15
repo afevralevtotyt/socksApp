@@ -18,6 +18,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import java.util.*;
+
 @Validated
 @Service
 public class SockServiceImpl implements SockService {
@@ -45,6 +46,7 @@ public class SockServiceImpl implements SockService {
             e.printStackTrace();
         }
     }
+
     @PostConstruct
     public void initReport() {
         try {
@@ -55,7 +57,7 @@ public class SockServiceImpl implements SockService {
     }
 
     @Override
-    public SockInput add(@Valid  SockInput socksInput) {
+    public SockInput add(@Valid SockInput socksInput) {
         Sock sock = new Sock(Color.colorOf(socksInput.getColor()), Size.valueOf(socksInput.getSize()), socksInput.getCottonPart());
         socksMap.put(sock, (socksMap.getOrDefault(sock, 0) + socksInput.getQuantity()));
         saveToFile();
@@ -65,7 +67,7 @@ public class SockServiceImpl implements SockService {
     }
 
     @Override
-    public int getSocks(@ColorValid String color, @Min(36) @Max(49) int size, @Min(0) @Max(100) int cottonMin, @Min(0)@Max(100) int cottonMax) {
+    public int getSocks(@ColorValid String color, @Min(36) @Max(49) int size, @Min(0) @Max(100) int cottonMin, @Min(0) @Max(100) int cottonMax) {
         if (cottonMin > cottonMax) {
             throw new WrongCottonPartException("Введен неверный процент хлопка");
         }
@@ -82,43 +84,43 @@ public class SockServiceImpl implements SockService {
     @Override
     public SockInput delete(@Valid SockInput socksInput) {
         Sock socks = new Sock(Color.colorOf(socksInput.getColor()), Size.valueOf(socksInput.getSize()), socksInput.getCottonPart());
-        if (socksMap.containsKey(socks)) {
-            if (socksInput.getQuantity() == socksMap.get(socks)) {
-                socksMap.remove(socks);
-            } else if (socksInput.getQuantity() > socksMap.get(socks)) {
-                throw new WrongQuantityException("Введено неверное количество товара");
-            } else {
-                socksMap.put(socks, socksMap.get(socks) - socksInput.getQuantity());
-            }
-            saveToFile();
-            operations.add(new Operation("Списание", socksInput.getQuantity(), socks));
-            saveReportToFile();
-            return socksInput;
+        if (!socksMap.containsKey(socks)) {
+            throw new WrongSocksException("Нет такого товара");
         }
-        return null;
+        if (socksInput.getQuantity() > socksMap.get(socks)) {
+            throw new WrongQuantityException("Введено неверное количество товара");
+        }
+        if (socksInput.getQuantity() == socksMap.get(socks)) {
+            socksMap.remove(socks);
+        } else {
+            socksMap.put(socks, socksMap.get(socks) - socksInput.getQuantity());
+        }
+        saveToFile();
+        operations.add(new Operation("Списание", socksInput.getQuantity(), socks));
+        saveReportToFile();
+        return socksInput;
     }
 
     @Override
     public String edit(@Valid SockInput socksInput) {
         Sock sock = new Sock(Color.colorOf(socksInput.getColor()), Size.valueOf(socksInput.getSize()), socksInput.getCottonPart());
-        if (socksMap.containsKey(sock)) {
-            if (socksInput.getQuantity() > socksMap.get(sock)) {
-                throw new WrongQuantityException("Нет товара в таком количестве");
-            } else if (socksInput.getQuantity() == socksMap.get(sock)) {
-                socksMap.remove(sock);
-                operations.add(new Operation("Отпуск", socksInput.getQuantity(), sock));
-                saveReportToFile();
-                saveToFile();
-                return "На складе больше нет такого товара";
-            } else {
-                socksMap.put(sock, (socksMap.get(sock) - socksInput.getQuantity()));
-                operations.add(new Operation("Отпуск", socksInput.getQuantity(), sock));
-                saveReportToFile();
-                saveToFile();
-                return "Удалось отпустить товар со склада";
-            }
-        } else {
+        if (!socksMap.containsKey(sock)) {
             throw new WrongSocksException("Нет такого товара");
+        }
+        if (socksInput.getQuantity() > socksMap.get(sock)) {
+            throw new WrongQuantityException("Нет товара в таком количестве");
+        } else if (socksInput.getQuantity() == socksMap.get(sock)) {
+            socksMap.remove(sock);
+            operations.add(new Operation("Отпуск", socksInput.getQuantity(), sock));
+            saveReportToFile();
+            saveToFile();
+            return "На складе больше нет такого товара";
+        } else {
+            socksMap.put(sock, (socksMap.get(sock) - socksInput.getQuantity()));
+            operations.add(new Operation("Отпуск", socksInput.getQuantity(), sock));
+            saveReportToFile();
+            saveToFile();
+            return "Удалось отпустить товар со склада";
         }
     }
 
@@ -167,12 +169,13 @@ public class SockServiceImpl implements SockService {
             throw new FileReadException("Ошибка чтения из файла");
         }
     }
+
     @Override
     public void readReportFile() {
         try {
             operations.clear();
             String json = filesService.readReportFromFile();
-            operations = new ObjectMapper().readValue(json, new TypeReference<ArrayList<Operation>>(){
+            operations = new ObjectMapper().readValue(json, new TypeReference<ArrayList<Operation>>() {
             });
         } catch (JsonProcessingException e) {
             e.printStackTrace();
